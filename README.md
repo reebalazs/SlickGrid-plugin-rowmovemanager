@@ -51,7 +51,7 @@ Then you can use `npm` to install both the sources and the necessary node tools,
 your working directory to the place of the installation:
 
     $ npm install git+https://github.com/reebalazs/SlickGrid-plugin-rowmovemanager.git
-    $ cd node_modules/slickgrid-bootstrap-dev
+    $ cd node_modules/slickgrid-plugin-rowmovemanager-dev
 
 Alternately, if you have already checked out these sources from git, you can go
 to this directory and install it locally with npm:
