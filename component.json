@@ -1,0 +1,10 @@
+{
+    "name": "slickgrid-plugin-rowmovemanager",
+    "version": "0.1.0",
+    "dependencies": {
+        "jquery": ">=1.7 <2",
+        "jquery-ui": ">=1.8 <2",
+        "bootstrap": ">=2.2.2 <3",
+        "slickgrid": ">=2.0 <3"
+    }
+}

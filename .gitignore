@@ -1,0 +1,7 @@
+.gitk*
+.idea/*
+.DS_Store
+node_modules
+/components
+*.sublime-project
+*.sublime-workspace
