@@ -29,6 +29,25 @@
 
     // Add a bottom border to the grid.
     border-bottom: 1px solid @tableBorder;
+
+
+    .cell-reorder {
+        cursor: move;
+        background: url("../drag-handle.png") no-repeat center center;
+    }
+
+    .cell-selection {
+        border-right-color: silver;
+        border-right-style: solid;
+        background: #f5f5f5;
+        color: gray;
+        text-align: right;
+        font-size: 10px;
+    }
+    .slick-row.selected .cell-selection {
+        background-color: transparent; // show default selected row background
+    }
+
 }
 
 .grid-col {

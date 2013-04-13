@@ -57,6 +57,7 @@ grid.registerPlugin(moveRowsPlugin);</pre>
 <script src="dist/components/slickgrid/slick.dataview.js"></script>
 <script src="dist/components/slickgrid/plugins/slick.checkboxselectcolumn.js"></script>
 <script src="dist/components/slickgrid/plugins/slick.rowselectionmodel.js"></script>
+<script src="../plugins/slick.rowmovemanager.js"></script>
 <!-- bootstrap helper -->
 <script src="dist/components/slickgrid-bootstrap/bootstrap/bootstrap-slickgrid.js"></script>
 <script>
@@ -68,12 +69,12 @@ jQuery(function ($) {
 
 
  var columnsSortable = [
-    {id: "title", name: "Title", field: "title", width: 200, sortable: true, formatter: DummyLinkFormatter},
-    {id: "duration", name: "Duration", field: "duration", width: 100, sortable: true},
-    {id: "%", name: "% Complete", field: "percentComplete", width: 100, sortable: true},
-    {id: "start", name: "Start", field: "start", width: 100, sortable: true},
-    {id: "finish", name: "Finish", field: "finish", width: 100, sortable: true},
-    {id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 100, sortable: true}
+    {id: "title", name: "Title", field: "title", width: 200, sortable: false, formatter: DummyLinkFormatter},
+    {id: "duration", name: "Duration", field: "duration", width: 100, sortable: false},
+    {id: "%", name: "% Complete", field: "percentComplete", width: 100, sortable: false},
+    {id: "start", name: "Start", field: "start", width: 100, sortable: false},
+    {id: "finish", name: "Finish", field: "finish", width: 100, sortable: false},
+    {id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 100, sortable: false}
   ];
 
   // move column: add it
@@ -144,27 +145,45 @@ jQuery(function ($) {
       grid.setSelectionModel(new Slick.RowSelectionModel());
       grid.registerPlugin(checkboxSelector);
 
-      // sorting
-      var sortCol = o.sortCol;
-      var sortDir = o.sortDir;
-      function comparer(a, b) {
-        var x = a[sortCol], y = b[sortCol];
-        return (x == y ? 0 : (x > y ? 1 : -1));
-      }
-      grid.onSort.subscribe(function (e, args) {
-          sortDir = args.sortAsc;
-          sortCol = args.sortCol.field;
-          dataView.sort(comparer, sortDir);
-          grid.invalidateAllRows();
-          grid.render();
+      var moveRowsPlugin = new Slick.RowMoveManager({
+          cancelEditOnDrag: true,
+          keepSelectionOnMove: true,
+          singleStaysSelected: false,
+          preventDroppingOnSelf: true
+      });
+      grid.registerPlugin(moveRowsPlugin);
+
+      moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+        var extractedRows = [], left, right;
+        var rows = args.rows;
+        var insertBefore = args.insertBefore;
+        left = data.slice(0, insertBefore);
+        right = data.slice(insertBefore, data.length);
+        rows.sort(function(a,b) { return a-b; });
+        for (var i = 0; i < rows.length; i++) {
+          extractedRows.push(data[rows[i]]);
+        }
+        rows.reverse();
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          if (row < insertBefore) {
+            left.splice(row, 1);
+          } else {
+            right.splice(row - insertBefore, 1);
+          }
+        }
+        data = left.concat(extractedRows.concat(right));
+        var selectedRows = [];
+        for (var i = 0; i < rows.length; i++) {
+          selectedRows.push(left.length + i);
+        }
+        grid.resetActiveCell();
+        grid.setData(data);
+        grid.setSelectedRows(selectedRows);
+        grid.render();
       });
 
-      // set the initial sorting to be shown in the header
-      if (sortCol) {
-          grid.setSortColumn(sortCol, sortDir);
-      }
-
-       // initialize the model after all the events have been hooked up
+      // initialize the model after all the events have been hooked up
       dataView.beginUpdate();
       dataView.setItems(o.data);
       dataView.endUpdate();
