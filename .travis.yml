@@ -3,13 +3,14 @@ node_js:
   - 0.10
 notifications:
   irc: irc.freenode.org#greenfinity
-before_script:
+install:
+  - npm install .
   - export PATH="$PWD/node_modules/.bin:$PATH"
-  - bower install
   - export DISPLAY=:99.0
+  - bower install
+before_script:
   - echo 'Starting buster server...'
   - buster server &
-  - sleep 5
   - echo 'Done.'
   - echo 'Starting xvfb for FF...'
   - sh -e /etc/init.d/xvfb start

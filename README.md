@@ -1,3 +1,7 @@
+
+[![Build Status](https://travis-ci.org/reebalazs/slickgrid-plugin-rowmovemanager.png)](https://travis-ci.org/reebalazs/slickgrid-plugin-rowmovemanager)
+
+
 # SlickGrid rowmovemanager plugin
 
 An alternate behaviour with row moving.
