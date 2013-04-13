@@ -187,3 +187,7 @@ body .grid .slick-header-columns .slick-header-column.ui-state-default {
 .info-col {
   padding: 20px;
 }
+.cell-reorder {
+  cursor: move;
+  background: url("../drag-handle.png") no-repeat center center;
+}

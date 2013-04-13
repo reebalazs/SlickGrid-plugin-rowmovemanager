@@ -41,7 +41,8 @@ module.exports = function(grunt) {
                     collect.select('example-lib.js'),
                     [
                         'bootstrap/slickgrid.less',
-                        'components/bootstrap/less/variables.less'
+                        'components/bootstrap/less/variables.less',
+                        'components/slickgrid-bootstrap/bootstrap/slickgrid.less'
                     ]
                 ),
                 tasks: ['copy:default', 'less:default']
