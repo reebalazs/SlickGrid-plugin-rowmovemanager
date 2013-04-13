@@ -1,5 +1,5 @@
 
-[![Build Status](https://travis-ci.org/reebalazs/slickgrid-plugin-rowmovemanager.png)](https://travis-ci.org/reebalazs/slickgrid-plugin-rowmovemanager)
+[![Build Status](https://travis-ci.org/reebalazs/SlickGrid-plugin-rowmovemanager.png)](https://travis-ci.org/reebalazs/SlickGrid-plugin-rowmovemanager)
 
 
 # SlickGrid rowmovemanager plugin
