@@ -31,8 +31,53 @@ var moveRowsPlugin = new Slick.RowMoveManager({
     preventDroppingOnSelf: true
 });
 grid.registerPlugin(moveRowsPlugin);</pre>
+      <p>Differences from original plugin behaviour:</p>
       <ul>
-        <li>...</li>
+        <li>one or more selected + grabbing an unselected row:
+            the grabbed row will be selected in additon to the current
+            selection, all selected rows will be moved, and stay selected
+            after being dropped (keepSelectionOnMove: true)
+        </li>
+        <li>no selection + grabbing a row: row moved, but it will not
+            become selected after being dropped. This has an effect only
+            if we grab a single row and it was not originally selected.
+            (singleStaysSelected: false)
+        </li>
+        <li>If the rows are being dropped on top of themselves, the
+            event will be prevented. The original plugin does not deal with
+            this, and leaves the implementation for outside, as shown
+            by the example demo. (preventDroppingOnSelf: true)
+        </li>
+      </ul>
+      <p>Identical behaviour to the original:</p>
+      <ul>
+        <li>one or more selected + grabbing a selected row: all selected rows moved,
+            and they all stay selected in the end</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" class="grid-col">
+      <div id="grid2" class="grid"></div>
+    </td>
+    <td valign="top" class="info-col">
+      <h2>Revert to original plugin behavior, for comparison</h2>
+      <pre>
+var moveRowsPlugin = new Slick.RowMoveManager({
+    cancelEditOnDrag: true,
+    //keepSelectionOnMove: false,
+    //singleStaysSelected: true,
+    //preventDroppingOnSelf: false
+});
+grid.registerPlugin(moveRowsPlugin);</pre>
+      <ul>
+        <li>no selection + grabbing a row: row moved, and
+            stays selected after being dropped</li>
+        <li>one or more selected + grabbing a selected row: all selected rows moved,
+            and they all stay selected in the end</li>
+        <li>one or more selected + grabbing an unselected row:
+            current selection are cleared, the grabbed row will be moved,
+            and stays selected after being dropped
       </ul>
     </td>
   </tr>
@@ -116,6 +161,7 @@ jQuery(function ($) {
   */
   columns = columnsSortable.slice();
   data = dataFull.slice();
+
   $("#grid1").slickgrid({
     columns: columns,
     data: data,
@@ -199,6 +245,107 @@ jQuery(function ($) {
                            // action fixes the situation.
       
     }
+
+  });
+
+
+  // Example 2: Row move, defaulting to original plugin behaviour
+  /* 
+            var moveRowsPlugin = new Slick.RowMoveManager({
+                cancelEditOnDrag: true
+                //keepSelectionOnMove: false,
+                //singleStaysSelected: true,
+                //preventDroppingOnSelf: false
+            });
+            grid.registerPlugin(moveRowsPlugin);
+  */
+  columns = columnsSortable.slice();
+  data = dataFull.slice();
+  
+  $("#grid2").slickgrid({
+    columns: columns,
+    data: data,
+    slickGridOptions: {
+      enableCellNavigation: false,
+      enableColumnReorder: true,
+      forceFitColumns: false,
+      rowHeight: 35
+    },
+    // handleCreate takes some extra options:
+    sortCol: undefined,
+    sortDir: true,
+    handleCreate: function () {
+      var o = this.wrapperOptions;
+    
+      // checkbox column: add it
+      var columns = o.columns.slice();
+      var checkboxSelector = new Slick.CheckboxSelectColumn({});
+      columns.unshift(checkboxSelector.getColumnDefinition());
+
+      // configure grid with client-side data view
+      var dataView = new Slick.Data.DataView();
+      var grid = new Slick.Grid(this.element, dataView,
+        columns, o.slickGridOptions);
+
+      // selection model
+      grid.setSelectionModel(new Slick.RowSelectionModel());
+      grid.registerPlugin(checkboxSelector);
+
+      var moveRowsPlugin = new Slick.RowMoveManager({
+          cancelEditOnDrag: true
+          //keepSelectionOnMove: false,
+          //singleStaysSelected: true,
+          //preventDroppingOnSelf: false
+      });
+      grid.registerPlugin(moveRowsPlugin);
+
+      moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+        var extractedRows = [], left, right;
+        var rows = args.rows;
+        var insertBefore = args.insertBefore;
+        left = data.slice(0, insertBefore);
+        right = data.slice(insertBefore, data.length);
+        rows.sort(function(a,b) { return a-b; });
+        for (var i = 0; i < rows.length; i++) {
+          extractedRows.push(data[rows[i]]);
+        }
+        rows.reverse();
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          if (row < insertBefore) {
+            left.splice(row, 1);
+          } else {
+            right.splice(row - insertBefore, 1);
+          }
+        }
+        data = left.concat(extractedRows.concat(right));
+        var selectedRows = [];
+        for (var i = 0; i < rows.length; i++) {
+          selectedRows.push(left.length + i);
+        }
+        grid.resetActiveCell();
+        grid.setData(data);
+        grid.setSelectedRows(selectedRows);
+        grid.render();
+      });
+
+      // initialize the model after all the events have been hooked up
+      dataView.beginUpdate();
+      dataView.setItems(o.data);
+      dataView.endUpdate();
+      
+      // if you don't want the items that are not visible (due to being filtered out
+      // or being on a different page) to stay selected, pass 'false' to the second arg
+      dataView.syncGridSelection(grid, true);
+
+      grid.resizeCanvas(); // XXX Why is this needed? A possible bug?
+                           // If this is missing, the grid will have
+                           // a horizontal scrollbar, and the vertical
+                           // scrollbar cannot be moved. A column reorder
+                           // action fixes the situation.
+      
+    }
+
 
   });
 
